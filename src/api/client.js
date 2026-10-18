@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getErrorMessage, isUnauthorized } from '../utils/error';
 
 export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+  import.meta.env.VITE_API_BASE_URL || 'https://smartapartment-backend.onrender.com/api/v1';
 
 const client = axios.create({
   baseURL: BASE_URL,
