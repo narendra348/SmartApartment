@@ -2,7 +2,9 @@ import axios from 'axios';
 import { getErrorMessage, isUnauthorized } from '../utils/error';
 
 export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://smartapartment-backend.onrender.com/api/v1';
+  (import.meta.env.VITE_API_BASE_URL || 'https://smartapartment-backend.onrender.com/api/v1')
+    .trim()
+    .replace(/\/+$/, '');
 
 const client = axios.create({
   baseURL: BASE_URL,
@@ -11,7 +13,7 @@ const client = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
-  timeout: 10_000, // 10 seconds
+  timeout: 30_000, // 30 seconds (accommodates cloud cold starts)
 });
 
 // ---------------------------------------------------------------------------

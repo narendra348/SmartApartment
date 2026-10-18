@@ -207,23 +207,29 @@ function resolveErrorMessage(err) {
     msg.includes('failed to fetch') ||
     msg.includes('cors')
   ) {
+    if (!navigator.onLine) {
+      return {
+        type: 'network',
+        text: 'You appear to be offline. Please check your internet connection.',
+      };
+    }
     return {
       type: 'network',
-      text: `Cannot connect to the server. Start the backend API at ${BASE_URL} and verify it is running.`,
+      text: 'Unable to connect to the server. The backend service may be starting up or temporarily unreachable. Please try again in a few moments.',
     };
   }
 
   // Validation errors (422)
   if (status === 422) {
-    return { type: 'validation', text: data?.message || 'Please correct the form errors and try again.' };
+    return { type: 'validation', text: data?.error?.message || data?.message || 'Please correct the form errors and try again.' };
   }
 
   // Server error
   if (status >= 500) {
-    return { type: 'server', text: 'A server error occurred. Please try again in a moment.' };
+    return { type: 'server', text: data?.error?.message || data?.message || 'A server error occurred. Please try again in a moment.' };
   }
 
-  return { type: 'generic', text: err.message || 'Sign-in failed. Please try again.' };
+  return { type: 'generic', text: data?.error?.message || data?.message || err.message || 'Sign-in failed. Please try again.' };
 }
 
 // ---------------------------------------------------------------------------

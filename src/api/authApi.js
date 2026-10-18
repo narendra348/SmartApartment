@@ -85,7 +85,7 @@ export async function logout() {
  * @returns {Promise<object|null>}  null if unauthenticated
  */
 export async function getCurrentUser() {
-  const response = await client.get('/auth/me', { timeout: 2000 });
+  const response = await client.get('/auth/me');
   return extractUser(response.data);
 }
 

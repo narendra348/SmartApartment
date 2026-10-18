@@ -44,14 +44,39 @@ profileRouter.put('/', updateProfile);
 profileRouter.patch('/', updateProfile);
 
 // ── CORS Configuration ────────────────────────────────────────────────────────
+// Strictly allow credentialed requests from the configured frontend origin(s)
+const rawClientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const configuredOrigins = rawClientUrl
+  .split(',')
+  .map((u) => u.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
 
-// ── CORS Configuration ────────────────────────────────────────────────────────
-// Strictly allow credentialed requests from the configured frontend origin only
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const defaultAllowedOrigins = [
+  'https://smart-apartment-indol.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+];
+
+const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultAllowedOrigins]));
 
 app.use(
   cors({
-    origin: clientUrl,
+    origin: (origin, callback) => {
+      // Allow non-browser requests (e.g. server-to-server, curl, health checks)
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+      const isAllowed =
+        allowedOrigins.includes(normalizedOrigin) ||
+        /^https:\/\/smart-apartment[a-z0-9-]*\.vercel\.app$/.test(normalizedOrigin);
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Accept'],

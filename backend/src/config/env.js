@@ -26,7 +26,7 @@ export function getEnvConfig() {
     throw new Error(`[Config Error] Invalid PORT specified: "${process.env.PORT}". Must be a number between 1 and 65535.`);
   }
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').trim().replace(/\/+$/, '');
   const mongoUri = (process.env.MONGODB_URI || '').trim();
   const sessionSecret = process.env.SESSION_SECRET || 'dev-session-secret-change-in-production';
   const nodeEnv = process.env.NODE_ENV || 'development';

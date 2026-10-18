@@ -18,6 +18,9 @@ export function getErrorMessage(error, defaultMessage = 'Something went wrong. P
     if (typeof data.error === 'string' && data.error.trim()) {
       return data.error;
     }
+    if (typeof data.error === 'object' && data.error !== null && typeof data.error.message === 'string' && data.error.message.trim()) {
+      return data.error.message;
+    }
     if (Array.isArray(data.errors) && data.errors.length > 0) {
       const first = data.errors[0];
       if (typeof first === 'string') return first;
