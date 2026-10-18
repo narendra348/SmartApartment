@@ -17,6 +17,26 @@ export function maskMongoUri(uri) {
 }
 
 /**
+ * Sanitize MongoDB connection string to eliminate syntax errors such as:
+ * - Trailing semicolons from bash/render copy-paste (e.g. w=majority;)
+ * - Enclosing quotes (e.g. "mongodb+srv://...")
+ * - Semicolons embedded inside query parameters
+ */
+export function sanitizeMongoUri(rawUri) {
+  if (!rawUri || typeof rawUri !== 'string') return '';
+  let uri = rawUri.trim().replace(/^["'`]|["'`]$/g, '').trim();
+
+  // Strip trailing semicolons or slashes at the end
+  uri = uri.replace(/[;/]+$/, '').trim();
+
+  // Fix query parameters ending with a semicolon, e.g. &w=majority; -> &w=majority
+  uri = uri.replace(/([?&][a-zA-Z0-9_]+=)([^&;]+);(?=&|$)/g, '$1$2');
+  uri = uri.replace(/;(?=&|$)/g, '');
+
+  return uri;
+}
+
+/**
  * Validate required and optional environment configuration.
  * Returns an object with parsed configuration or throws descriptive errors.
  */
@@ -27,7 +47,7 @@ export function getEnvConfig() {
   }
 
   const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').trim().replace(/\/+$/, '');
-  const mongoUri = (process.env.MONGODB_URI || '').trim();
+  const mongoUri = sanitizeMongoUri(process.env.MONGODB_URI || '');
   const sessionSecret = process.env.SESSION_SECRET || 'dev-session-secret-change-in-production';
   const nodeEnv = process.env.NODE_ENV || 'development';
 

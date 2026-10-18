@@ -84,4 +84,40 @@ describe('GET /api/v1/health - Express Health Endpoint', () => {
     const notFoundRes = await fetch(`${baseUrl}/api/v1/non-existent-route`);
     assert.equal(notFoundRes.status, 404);
   });
+
+  it('should return HTTP 200 with service info on GET /', async () => {
+    const rootRes = await fetch(`${baseUrl}/`);
+    assert.equal(rootRes.status, 200);
+    const body = await rootRes.json();
+    assert.equal(body.status, 'ok');
+    assert.ok(typeof body.message === 'string');
+    assert.equal(body.endpoints.health, '/api/v1/health');
+  });
+});
+
+describe('MongoDB URI Sanitization Regression Suite', () => {
+  it('should clean trailing semicolons, quotes, and w=majority; query params', async () => {
+    const { sanitizeMongoUri } = await import('../src/config/env.js');
+
+    assert.equal(
+      sanitizeMongoUri('mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority;'),
+      'mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority',
+    );
+    assert.equal(
+      sanitizeMongoUri('"mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority;"'),
+      'mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority',
+    );
+    assert.equal(
+      sanitizeMongoUri('mongodb+srv://user:pass@cluster0.net/smartapartment?w=majority;&retryWrites=true'),
+      'mongodb+srv://user:pass@cluster0.net/smartapartment?w=majority&retryWrites=true',
+    );
+    assert.equal(
+      sanitizeMongoUri('mongodb://127.0.0.1:27017/smartapartment;'),
+      'mongodb://127.0.0.1:27017/smartapartment',
+    );
+    assert.equal(
+      sanitizeMongoUri('  mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority;  '),
+      'mongodb+srv://user:pass@cluster0.net/smartapartment?retryWrites=true&w=majority',
+    );
+  });
 });

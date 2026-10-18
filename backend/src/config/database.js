@@ -12,7 +12,7 @@
  */
 
 import mongoose from 'mongoose';
-import { env, maskMongoUri } from './env.js';
+import { env, maskMongoUri, sanitizeMongoUri } from './env.js';
 
 const STATE_NAMES = {
   0: 'disconnected',
@@ -48,7 +48,8 @@ function registerConnectionEvents() {
  * @returns {Promise<boolean>} True if connected, false if failed
  */
 export async function connectDB(customUri) {
-  const uri = (customUri !== undefined ? customUri : env.MONGODB_URI || '').trim();
+  const rawUri = customUri !== undefined ? customUri : env.MONGODB_URI || '';
+  const uri = sanitizeMongoUri(rawUri);
 
   if (!uri) {
     console.error('[MongoDB Config Error] MONGODB_URI environment variable is missing or empty.');

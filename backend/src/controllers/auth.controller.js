@@ -514,6 +514,26 @@ export async function registerApartment(req, res, next) {
       },
     });
   } catch (err) {
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0] || 'field';
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_ENTRY',
+          message: `An account or community with this ${field} already exists.`,
+        },
+      });
+    }
+    if (err.name === 'ValidationError') {
+      const firstError = Object.values(err.errors || {})[0]?.message || 'Validation error.';
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: firstError,
+        },
+      });
+    }
     next(err);
   }
 }

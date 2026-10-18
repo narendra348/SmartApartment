@@ -88,6 +88,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// ── Root Endpoint ───────────────────────────────────────────────────────────
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'SmartApartment API Backend is running',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/v1/health',
+      auth: '/api/v1/auth',
+    },
+  });
+});
+
 // ── API Routes (Prefix: /api/v1) ─────────────────────────────────────────────
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/auth', authRoutes);
